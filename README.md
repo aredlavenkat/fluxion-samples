@@ -10,8 +10,10 @@ published `0.0.1-SNAPSHOT` artifacts from `fluxion-core-engine-java`.
   and executes it with `PipelineExecutor`.
 - `streaming-quickstart` – demonstrates the streaming runtime with the in-memory
   iterable source and collecting sink.
-- `connectors-catalog` – introspects the connector registry and prints the
-  available source/sink providers at runtime.
+- `streaming-kafka` – spins up a Kafka Testcontainer and streams messages from
+  an input topic to an output topic via Fluxion stages.
+- `streaming-mongo` – mirrors the MongoDB change-stream E2E test using a
+  Testcontainer to fan documents into a sink collection.
 - `enrich-http` – JUnit sample using MockWebServer to showcase `$httpCall`
   orchestration with retry-friendly configuration.
 - `fluxion-rules-starter-sample` – Spring Boot service that loads rules
@@ -28,28 +30,38 @@ published `0.0.1-SNAPSHOT` artifacts from `fluxion-core-engine-java`.
    cd ../fluxion-core-engine-java
    mvn -DskipTests install
    ```
-2. Return to this directory and build all samples:
-   ```bash
-   mvn clean package
-   ```
-3. Run an individual sample (examples below):
+2. Change into the sample you want to explore and run it directly. Each module is
+   independent; no need to build the entire suite at once.
    ```bash
    # Core pipeline CLI
-   mvn -pl core-quickstart exec:java
+   cd ../fluxion-sample/core-quickstart
+   mvn exec:java
 
-   # Streaming demo
-   mvn -pl streaming-quickstart exec:java
+   # Streaming demo (in-memory source/sink)
+   cd ../fluxion-sample/streaming-quickstart
+   mvn exec:java
 
-  # Spring Boot rules service
-  mvn -pl fluxion-rules-starter-sample spring-boot:run
+   # Streaming demo (Kafka connector, requires Docker)
+   cd ../fluxion-sample/streaming-kafka
+   mvn exec:java
 
-  # Temporal workflow demo
-  mvn -pl workflow-quickstart exec:java
+   # Streaming demo (MongoDB change stream, requires Docker)
+   cd ../fluxion-sample/streaming-mongo
+   mvn exec:java
 
-  # The output shows two scenarios:
-  # 1. LOW VALUE order → approved automatically (`flag=auto`).
-  # 2. HIGH VALUE order → routed to manual review and rejected (`flag=review`, `manualApproval=false`).
+   # Spring Boot rules service
+   cd ../fluxion-sample/fluxion-rules-starter-sample
+   mvn spring-boot:run
+
+   # Temporal workflow demo
+   cd ../fluxion-sample/workflow-quickstart
+   mvn exec:java
    ```
+
+   The workflow sample prints both scenarios:
+
+   - LOW VALUE order → approved automatically (`flag=auto`).
+   - HIGH VALUE order → routed to manual review and rejected (`flag=review`, `manualApproval=false`).
 
 ## Repository Layout
 

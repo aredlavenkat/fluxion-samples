@@ -9,8 +9,8 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>connectors-catalog</artifactId>
-    <name>Fluxion Connectors Catalog</name>
+    <artifactId>streaming-kafka</artifactId>
+    <name>Fluxion Streaming Kafka Sample</name>
 
     <dependencies>
         <dependency>
@@ -22,9 +22,18 @@
             <artifactId>fluxion-connect</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${testcontainers.version}</version>
         </dependency>
     </dependencies>
 
@@ -34,7 +43,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>ai.fluxion.sample.connectors.ConnectorsCatalogApp</mainClass>
+                    <mainClass>ai.fluxion.sample.streaming.kafka.KafkaStreamingSample</mainClass>
                 </configuration>
             </plugin>
         </plugins>

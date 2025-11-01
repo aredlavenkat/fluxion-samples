@@ -11,15 +11,6 @@
     <name>Fluxion Samples</name>
     <description>Sample applications demonstrating the Fluxion platform modules.</description>
 
-    <modules>
-        <module>core-quickstart</module>
-        <module>streaming-quickstart</module>
-        <module>connectors-catalog</module>
-        <module>enrich-http</module>
-        <module>fluxion-rules-starter-sample</module>
-        <module>workflow-quickstart</module>
-    </modules>
-
     <properties>
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -28,6 +19,7 @@
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <mockwebserver.version>4.12.0</mockwebserver.version>
         <temporal.sdk.version>1.23.0</temporal.sdk.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
     </properties>
 
     <dependencyManagement>
