@@ -10,6 +10,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.ServiceLoader;
 
+/**
+ * Introspects Fluxion Connect's ServiceLoader registry and prints available
+ * source/sink connectors with their option metadata for quick discovery.
+ */
 public final class ConnectorsCatalogApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorsCatalogApp.class);

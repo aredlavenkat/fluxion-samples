@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Simple REST controller exposing the auto-configured {@link RuleEvaluationService}
+ * so the sample can execute rule sets over HTTP payloads.
+ */
 @RestController
 @RequestMapping("/rules")
 public class RuleEvaluationController {

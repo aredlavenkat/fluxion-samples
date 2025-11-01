@@ -28,10 +28,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Demonstrates a richer Temporal workflow that orchestrates Fluxion rule evaluation
- * and optionally routes orders through a manual approval activity. The example is
- * adapted from the module integration tests so it mirrors production wiring while
- * remaining executable via {@code mvn -pl workflow-quickstart exec:java}.
+ * Demonstrates a richer Temporal workflow that orchestrates Fluxion rule evaluation.
+ * The sample covers both the automatic approval path and the manual-review branch
+ * (simulated human involvement) so teams can map the patterns onto their workers.
  */
 public final class WorkflowQuickstartApp {
 

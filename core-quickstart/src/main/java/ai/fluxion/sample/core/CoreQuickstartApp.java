@@ -13,6 +13,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Minimal command-line sample for the core pipeline engine. It loads a JSON
+ * pipeline definition, executes it against an in-memory document list, and
+ * logs the transformed documents.
+ */
 public final class CoreQuickstartApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreQuickstartApp.class);

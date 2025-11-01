@@ -17,6 +17,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Exercises the `$httpCall` enrichment operator end-to-end using MockWebServer,
+ * mirroring how pipeline stages would hydrate documents with HTTP responses.
+ */
 class EnrichHttpSampleTest {
 
     private MockWebServer server;

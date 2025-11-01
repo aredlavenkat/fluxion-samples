@@ -13,6 +13,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Demonstrates the in-memory streaming executor by wiring an iterable source,
+ * running aggregation stages, and logging emitted batches alongside stage metrics.
+ */
 public final class StreamingQuickstartApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StreamingQuickstartApp.class);
