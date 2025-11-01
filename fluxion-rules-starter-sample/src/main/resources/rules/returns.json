@@ -1,0 +1,26 @@
+{
+  "id": "returns",
+  "name": "Returns Review Rules",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "id": "high-risk-return",
+      "name": "High risk return",
+      "salience": 9,
+      "stages": [
+        { "$match": { "refundAmount": { "$gte": 750 } } },
+        { "$match": { "customer.flags": { "$in": ["fraud_watch"] } } }
+      ],
+      "actions": ["flag-return"]
+    },
+    {
+      "id": "late-return",
+      "name": "Return outside policy",
+      "salience": 4,
+      "stages": [
+        { "$match": { "daysSincePurchase": { "$gte": 45 } } }
+      ],
+      "actions": ["flag-return"]
+    }
+  ]
+}

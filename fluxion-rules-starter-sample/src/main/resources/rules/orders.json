@@ -1,0 +1,25 @@
+{
+  "id": "orders",
+  "name": "Sample Order Rules",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "id": "high-value",
+      "name": "High value order",
+      "salience": 10,
+      "stages": [
+        { "$match": { "total": { "$gte": 1000 } } }
+      ],
+      "actions": ["flag-order"]
+    },
+    {
+      "id": "new-customer",
+      "name": "New customer order",
+      "salience": 5,
+      "stages": [
+        { "$match": { "customer.status": "new" } }
+      ],
+      "actions": ["flag-order"]
+    }
+  ]
+}

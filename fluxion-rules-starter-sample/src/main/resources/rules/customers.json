@@ -1,0 +1,30 @@
+{
+  "id": "customers",
+  "name": "Customer Segmentation Rules",
+  "version": "1.0.0",
+  "metadata": {
+    "segment": "marketing"
+  },
+  "rules": [
+    {
+      "id": "vip-upgrade",
+      "name": "Upgrade to VIP",
+      "salience": 8,
+      "stages": [
+        { "$match": { "lifetimeSpend": { "$gte": 5000 } } },
+        { "$match": { "ordersInLast90Days": { "$gte": 5 } } }
+      ],
+      "actions": ["flag-order"]
+    },
+    {
+      "id": "reactivation-campaign",
+      "name": "Send reactivation offer",
+      "salience": 6,
+      "stages": [
+        { "$match": { "lastPurchaseDaysAgo": { "$gte": 180 } } },
+        { "$match": { "emailOptIn": true } }
+      ],
+      "actions": ["flag-order"]
+    }
+  ]
+}

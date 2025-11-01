@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: fluxion-rules-sample
+
+fluxion:
+  rules:
+    locations:
+      - classpath:rules/*.json
+    evaluation-service-enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,fluxionRules

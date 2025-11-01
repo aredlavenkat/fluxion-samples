@@ -1,0 +1,5 @@
+[
+  {"$match": {"status": "PAID"}},
+  {"$addFields": {"totalWithTax": {"$multiply": ["$total", 1.08]}}},
+  {"$project": {"_id": 0, "orderId": 1, "totalWithTax": 1}}
+]
