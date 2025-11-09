@@ -36,7 +36,7 @@ public final class StreamingQuickstartApp {
                   {"$match": {"status": "PAID"}},
                   {"$group": {
                       "_id": "$status",
-                      "count": {"$count": {}},
+                      "count": {"$sum": 1},
                       "totalRevenue": {"$sum": "$total"}
                   }}
                 ]
@@ -49,7 +49,11 @@ public final class StreamingQuickstartApp {
                 .directHandoff(true)
                 .build();
 
-        StreamingPipelineExecutor executor = new StreamingPipelineExecutor(64, config, StreamingErrorPolicy.retry(2));
+        StreamingErrorPolicy errorPolicy = StreamingErrorPolicy.builder()
+                .maxRetries(2)
+                .build();
+
+        StreamingPipelineExecutor executor = new StreamingPipelineExecutor(64, config, errorPolicy);
         StreamingContext context = new StreamingContext(null, Map.of("tenantId", "demo"), "orders-stream");
 
         executor.processStream(events, stages, documents -> {

@@ -36,6 +36,7 @@ public final class MongoStreamingSample {
     }
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("otel.sdk.disabled", "true");
         DockerImageName image = DockerImageName.parse("mongo:7.0");
         try (MongoDBContainer mongo = new MongoDBContainer(image).withCommand("--replSet", "rs0", "--bind_ip_all")) {
             mongo.start();
@@ -106,5 +107,6 @@ public final class MongoStreamingSample {
                 worker.join(Duration.ofSeconds(5));
             }
         }
+        System.exit(0);
     }
 }

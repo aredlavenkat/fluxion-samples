@@ -25,7 +25,9 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Demonstrates a richer Temporal workflow that orchestrates Fluxion rule evaluation.
@@ -36,18 +38,20 @@ public final class WorkflowQuickstartApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowQuickstartApp.class);
     private static final String TASK_QUEUE = "workflow-quickstart";
+    private static final Map<String, RuleSet> RULESETS = new ConcurrentHashMap<>();
 
     private WorkflowQuickstartApp() {
     }
 
     public static void main(String[] args) {
         RuleSet orderRules = buildRuleSet();
+        RULESETS.put(orderRules.id(), orderRules);
         Document lowValueOrder = orderDocument(280.50, "STANDARD");
         Document highValueOrder = orderDocument(2150.75, "EXPRESS");
 
         try (TestWorkflowEnvironment environment = TestWorkflowEnvironment.newInstance()) {
             Worker worker = environment.newWorker(TASK_QUEUE);
-            worker.registerActivitiesImplementations(new FluxionRuleActivitiesImpl(), new ThresholdManualApprovalActivities());
+            worker.registerActivitiesImplementations(new SampleRuleActivitiesImpl(), new ThresholdManualApprovalActivities());
             worker.registerWorkflowImplementationTypes(OrderApprovalWorkflowImpl.class);
             environment.start();
 
@@ -65,7 +69,11 @@ public final class WorkflowQuickstartApp {
                 WorkflowOptions.newBuilder().setTaskQueue(TASK_QUEUE).build()
         );
 
-        OrderApprovalRequest request = new OrderApprovalRequest(document, ruleSet, Duration.ofMinutes(2).toSeconds());
+        OrderApprovalRequest request = new OrderApprovalRequest(
+                document,
+                ruleSet.id(),
+                Duration.ofMinutes(2).toSeconds()
+        );
         OrderApprovalResult result = workflow.approve(request);
 
         LOGGER.info("=== {} ORDER DECISION ===", label);
@@ -133,35 +141,35 @@ public final class WorkflowQuickstartApp {
     // ----------------------------------------------------------------------
 
     @WorkflowInterface
-    interface OrderApprovalWorkflow {
+    public interface OrderApprovalWorkflow {
         @WorkflowMethod
         OrderApprovalResult approve(OrderApprovalRequest request);
     }
 
-    record OrderApprovalRequest(Document document, RuleSet ruleSet, long manualApprovalTimeoutSeconds) {
+    public record OrderApprovalRequest(Document document, String ruleSetId, long manualApprovalTimeoutSeconds) {
     }
 
-    record OrderApprovalResult(boolean approved, String reason, Map<String, Object> sharedAttributes) {
+    public record OrderApprovalResult(boolean approved, String reason, Map<String, Object> sharedAttributes) {
     }
 
     public static final class OrderApprovalWorkflowImpl implements OrderApprovalWorkflow {
 
-        private final FluxionRuleActivities ruleActivities;
+        private final SampleRuleActivities ruleActivities;
         private final ManualApprovalActivities manualActivities;
 
         public OrderApprovalWorkflowImpl() {
             ActivityOptions options = ActivityOptions.newBuilder()
                     .setScheduleToCloseTimeout(Duration.ofMinutes(1))
                     .build();
-            this.ruleActivities = Workflow.newActivityStub(FluxionRuleActivities.class, options);
+            this.ruleActivities = Workflow.newActivityStub(SampleRuleActivities.class, options);
             this.manualActivities = Workflow.newActivityStub(ManualApprovalActivities.class, options);
         }
 
         @Override
         public OrderApprovalResult approve(OrderApprovalRequest request) {
-            RuleActivityRequest ruleRequest = new RuleActivityRequest(
+            RuleEvaluationRequest ruleRequest = new RuleEvaluationRequest(
                     request.document(),
-                    request.ruleSet(),
+                    request.ruleSetId(),
                     true,
                     false
             );
@@ -189,8 +197,16 @@ public final class WorkflowQuickstartApp {
     }
 
     @ActivityInterface
-    interface ManualApprovalActivities {
+    public interface ManualApprovalActivities {
         boolean requestApproval(String orderId, double amount, long timeoutSeconds);
+    }
+
+    @ActivityInterface
+    public interface SampleRuleActivities {
+        RuleActivityResult evaluateRuleSet(RuleEvaluationRequest request);
+    }
+
+    record RuleEvaluationRequest(Document document, String ruleSetId, boolean executeActions, boolean debugTracing) {
     }
 
     static final class ThresholdManualApprovalActivities implements ManualApprovalActivities {
@@ -201,6 +217,25 @@ public final class WorkflowQuickstartApp {
             boolean approved = amount < 2000;
             LOGGER.info("Manual approval {} for order {}", approved ? "GRANTED" : "DECLINED", orderId);
             return approved;
+        }
+    }
+
+    static final class SampleRuleActivitiesImpl implements SampleRuleActivities {
+
+        private final FluxionRuleActivities delegate = new FluxionRuleActivitiesImpl();
+
+        @Override
+        public RuleActivityResult evaluateRuleSet(RuleEvaluationRequest request) {
+            RuleSet ruleSet = Objects.requireNonNull(
+                    RULESETS.get(request.ruleSetId()),
+                    () -> "Unknown rule set id: " + request.ruleSetId());
+            RuleActivityRequest ruleRequest = new RuleActivityRequest(
+                    request.document(),
+                    ruleSet,
+                    request.executeActions(),
+                    request.debugTracing()
+            );
+            return delegate.evaluateRuleSet(ruleRequest);
         }
     }
 }

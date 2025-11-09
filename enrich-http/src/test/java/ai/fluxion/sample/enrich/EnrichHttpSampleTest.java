@@ -68,7 +68,7 @@ class EnrichHttpSampleTest {
                 """.formatted(baseUrl));
 
         PipelineExecutor executor = new PipelineExecutor();
-        List<Document> results = executor.run(input, stages, Map.of("traceId", "sample"));
+        List<Document> results = executor.execute(input, stages, Map.of("traceId", "sample"));
 
         assertEquals(1, results.size());
         Document enriched = results.get(0);

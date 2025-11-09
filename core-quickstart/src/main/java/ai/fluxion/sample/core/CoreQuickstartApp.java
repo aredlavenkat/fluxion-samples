@@ -35,7 +35,7 @@ public final class CoreQuickstartApp {
 
         List<Stage> stages = DocumentParser.getStagesFromJsonArray(readResource("/pipelines/orders.json"));
 
-        List<Document> results = executor.run(input, stages, Map.of("tenantId", "demo-store"));
+        List<Document> results = executor.execute(input, stages, Map.of("tenantId", "demo-store"));
         results.forEach(document -> LOGGER.info("Result: {}", document));
     }
 

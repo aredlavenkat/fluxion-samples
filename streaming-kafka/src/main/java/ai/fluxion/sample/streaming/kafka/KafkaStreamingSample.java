@@ -15,6 +15,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public final class KafkaStreamingSample {
     }
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("otel.sdk.disabled", "true");
         DockerImageName image = DockerImageName.parse("confluentinc/cp-kafka:7.5.3");
         try (KafkaContainer kafka = new KafkaContainer(image)) {
             kafka.start();
@@ -66,8 +68,8 @@ public final class KafkaStreamingSample {
 
             Properties producerProps = new Properties();
             producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
-            producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+            producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+            producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
 
             KafkaProducerSink sink = new KafkaProducerSink(producerProps, outputTopic, 32, Duration.ofSeconds(5));
 
@@ -97,6 +99,7 @@ public final class KafkaStreamingSample {
                 worker.join(Duration.ofSeconds(5));
             }
         }
+        System.exit(0);
     }
 
     private static void produceSampleMessages(String bootstrap, String topic) throws Exception {

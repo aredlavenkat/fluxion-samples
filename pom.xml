@@ -20,6 +20,8 @@
         <mockwebserver.version>4.12.0</mockwebserver.version>
         <temporal.sdk.version>1.23.0</temporal.sdk.version>
         <testcontainers.version>1.19.3</testcontainers.version>
+        <opentelemetry.version>1.32.0</opentelemetry.version>
+        <fluxion.version>0.0.1-SNAPSHOT</fluxion.version>
     </properties>
 
     <dependencyManagement>
@@ -37,6 +39,118 @@
                 <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-bom</artifactId>
+                <version>${opentelemetry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-metrics</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-otlp</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-context</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-common</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-trace</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-logs</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-otlp-common</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-common</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-sender-okhttp</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-extension-autoconfigure-spi</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api-events</artifactId>
+                <version>${opentelemetry.version}-alpha</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-extension-incubator</artifactId>
+                <version>${opentelemetry.version}-alpha</version>
+            </dependency>
+            <dependency>
+                <groupId>ai.fluxion</groupId>
+                <artifactId>fluxion-core</artifactId>
+                <version>${fluxion.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ai.fluxion</groupId>
+                <artifactId>fluxion-connect</artifactId>
+                <version>${fluxion.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ai.fluxion</groupId>
+                <artifactId>fluxion-enrich</artifactId>
+                <version>${fluxion.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ai.fluxion</groupId>
+                <artifactId>fluxion-rules</artifactId>
+                <version>${fluxion.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ai.fluxion</groupId>
+                <artifactId>fluxion-rules-spring-boot-starter</artifactId>
+                <version>${fluxion.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ai.fluxion</groupId>
+                <artifactId>fluxion-workflow</artifactId>
+                <version>${fluxion.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
