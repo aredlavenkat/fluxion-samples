@@ -1,5 +1,9 @@
 package ai.fluxion.sample.workflow;
 
+import ai.fluxion.core.agent.AgentCall;
+import ai.fluxion.core.agent.AgentExecutor;
+import ai.fluxion.core.agent.AgentRegistry;
+import ai.fluxion.core.agent.AgentResponse;
 import ai.fluxion.core.model.Document;
 import ai.fluxion.core.model.Stage;
 import ai.fluxion.rules.domain.RuleAction;
@@ -24,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -39,6 +44,12 @@ public final class WorkflowQuickstartApp {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowQuickstartApp.class);
     private static final String TASK_QUEUE = "workflow-quickstart";
     private static final Map<String, RuleSet> RULESETS = new ConcurrentHashMap<>();
+    private static final String ORDER_AGENT = "workflow-order-advisor";
+    private static final String ORDER_AGENT_VERSION = "1.0.0";
+
+    static {
+        AgentRegistry.getInstance().register(new WorkflowOrderAdvisorAgent());
+    }
 
     private WorkflowQuickstartApp() {
     }
@@ -86,6 +97,24 @@ public final class WorkflowQuickstartApp {
 
     private static RuleSet buildRuleSet() {
         Stage purchaseStage = new Stage(Map.of("$match", Map.of("type", "purchase")));
+        Stage agentInsightsStage = new Stage(Map.of(
+                "$agentCall", Map.of(
+                        "agent", ORDER_AGENT + "@" + ORDER_AGENT_VERSION,
+                        "input", Map.of(
+                                "orderId", "$orderId",
+                                "amount", "$amount",
+                                "shipping", "$shipping",
+                                "customerTier", "$customer.tier"
+                        ),
+                        "prompt", "Decide whether this order should auto-approve or go to manual review.",
+                        "metadata", Map.of(
+                                "sample", "workflow-quickstart",
+                                "channel", "temporal-demo"
+                        ),
+                        "responseField", "agentDecision",
+                        "onError", "bubble"
+                )
+        ));
 
         RuleAction enrichAttributes = ctx -> {
             Document doc = ctx.document();
@@ -102,7 +131,21 @@ public final class WorkflowQuickstartApp {
 
             double amount = amountValue instanceof Number number ? number.doubleValue() : 0.0;
             ctx.putSharedAttribute("amount", amount);
-            ctx.putSharedAttribute("flag", amount >= 1000 ? "review" : "auto");
+            Map<String, Object> agentDecision = extractAgentDecision(doc);
+            if (!agentDecision.isEmpty()) {
+                ctx.putSharedAttribute("agentDecision", agentDecision);
+                agentDecision.forEach((key, value) ->
+                        ctx.putSharedAttribute("agentDecision." + key, value));
+            }
+
+            String decision = agentDecision.getOrDefault("decision", "").toString();
+            String normalized = decision.isBlank() ? "" : decision.toLowerCase(Locale.ROOT);
+            boolean needsReview = switch (normalized) {
+                case "review", "escalate", "manual" -> true;
+                case "auto", "approve", "approved" -> false;
+                default -> amount >= 1000;
+            };
+            ctx.putSharedAttribute("flag", needsReview ? "review" : "auto");
         };
 
         RuleAction annotateDecision = ctx -> {
@@ -113,7 +156,7 @@ public final class WorkflowQuickstartApp {
 
         RuleDefinition rule = RuleDefinition.builder("order-screening")
                 .description("Routes orders to auto/manual approval based on amount")
-                .condition(RuleCondition.pipeline(List.of(purchaseStage)))
+                .condition(RuleCondition.pipeline(List.of(purchaseStage, agentInsightsStage)))
                 .addAction(enrichAttributes)
                 .addAction(annotateDecision)
                 .build();
@@ -134,6 +177,16 @@ public final class WorkflowQuickstartApp {
         payload.put("shipping", shippingTier);
         payload.put("customer", Map.of("tier", shippingTier.startsWith("EXP") ? "GOLD" : "BRONZE"));
         return new Document(payload);
+    }
+
+    private static Map<String, Object> extractAgentDecision(Document doc) {
+        Object raw = doc.get("agentDecision");
+        if (!(raw instanceof Map<?, ?> map)) {
+            return Map.of();
+        }
+        Map<String, Object> normalized = new LinkedHashMap<>();
+        map.forEach((key, value) -> normalized.put(key.toString(), value));
+        return normalized;
     }
 
     // ----------------------------------------------------------------------
@@ -236,6 +289,41 @@ public final class WorkflowQuickstartApp {
                     request.debugTracing()
             );
             return delegate.evaluateRuleSet(ruleRequest);
+        }
+    }
+
+    static final class WorkflowOrderAdvisorAgent implements AgentExecutor {
+
+        @Override
+        public String name() {
+            return ORDER_AGENT;
+        }
+
+        @Override
+        public String version() {
+            return ORDER_AGENT_VERSION;
+        }
+
+        @Override
+        public AgentResponse execute(AgentCall call) {
+            Map<String, Object> payload = call.payload();
+            double amount = ((Number) payload.getOrDefault("amount", 0)).doubleValue();
+            String shipping = Objects.toString(payload.getOrDefault("shipping", "STANDARD"), "STANDARD");
+            String customerTier = Objects.toString(payload.getOrDefault("customerTier", "BRONZE"), "BRONZE");
+
+            boolean expedited = shipping.startsWith("EXP");
+            boolean vip = "GOLD".equalsIgnoreCase(customerTier) || "PLATINUM".equalsIgnoreCase(customerTier);
+            boolean manualReview = amount >= 1000 || (expedited && !vip);
+
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("decision", manualReview ? "REVIEW" : "AUTO");
+            response.put("confidence", manualReview ? 0.63 : 0.92);
+            response.put("explanation", manualReview
+                    ? "High value or expedited shipment should be routed to humans."
+                    : "Order under threshold with standard shipping.");
+            response.put("notes", "Prompt: " + Objects.toString(call.prompt(), "n/a"));
+            response.put("policy", vip ? "VIP" : "STANDARD");
+            return new AgentResponse(response);
         }
     }
 }
