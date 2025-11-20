@@ -19,9 +19,6 @@ published `0.0.1-SNAPSHOT` artifacts from `fluxion-core-engine-java`.
 - `fluxion-rules-starter-sample` – Spring Boot service that loads rules
   via the starter, exposes a REST endpoint, and reuses the auto-configured
   evaluation service.
-- `workflow-quickstart` – Temporal TestWorkflowEnvironment demo that evaluates
-  order-approval rules. It exercises both the automatic approval path and the
-  manual-review branch (human involvement simulated via an activity stub).
 
 ## Getting Started
 
@@ -52,16 +49,7 @@ published `0.0.1-SNAPSHOT` artifacts from `fluxion-core-engine-java`.
    # Spring Boot rules service
    cd ../fluxion-sample/fluxion-rules-starter-sample
    mvn spring-boot:run
-
-   # Temporal workflow demo
-   cd ../fluxion-sample/workflow-quickstart
-   mvn exec:java
    ```
-
-   The workflow sample prints both scenarios:
-
-   - LOW VALUE order → approved automatically (`flag=auto`).
-   - HIGH VALUE order → routed to manual review and rejected (`flag=review`, `manualApproval=false`).
 
 ## Repository Layout
 
